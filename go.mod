@@ -1,4 +1,4 @@
-module https://github.com/tsungyumr/go-flutter-plugins-getmypath
+module github.com/tsungyumr/go-flutter-plugins-getmypath
 
 go 1.13
 
