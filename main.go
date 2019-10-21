@@ -26,8 +26,9 @@ func (p *MyPathPlugin) InitPlugin(messenger plugin.BinaryMessenger) error {
 	return nil // no error
 }
 
-func HandleGetCurrentPath() (reply interface{}, err error) {
-    file, err := exec.LookPath(os.Args[0])
+func HandleGetCurrentPath(arguments interface{}) (reply interface{}, err error) {
+dartMsg := arguments.(string) // reading the string argument
+    file, err := exec.LookPath(dartMsg)
     if err != nil {
         return "", err
     }
