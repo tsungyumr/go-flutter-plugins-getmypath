@@ -1,16 +1,12 @@
 package getmypath
 
 import (
-	"errors"
-    //  "fmt"
-    "os"
-    "os/exec"
-    "path/filepath"
-    "runtime"
-    "strings"
-	
+    "fmt"
 	flutter "github.com/go-flutter-desktop/go-flutter"
 	"github.com/go-flutter-desktop/go-flutter/plugin"
+	"github.com/lxn/win"
+	"unsafe"
+	"syscall"
 )
 
 //  Make sure to use the same channel name as was used on the Flutter client side.
@@ -27,24 +23,19 @@ func (p *MyPathPlugin) InitPlugin(messenger plugin.BinaryMessenger) error {
 }
 
 func HandleGetCurrentPath(arguments interface{}) (reply interface{}, err error) {
-dartMsg := arguments.(string) // reading the string argument
-    file, err := exec.LookPath(dartMsg)
-    if err != nil {
-        return "", err
-    }
-    path, err := filepath.Abs(file)
-    if err != nil {
-        return "", err
-    }
-    //fmt.Println("path111:", path)
-    if runtime.GOOS == "windows" {
-        path = strings.Replace(path, "\\", "/", -1)
-    }
-    //fmt.Println("path222:", path)
-    i := strings.LastIndex(path, "/")
-    if i < 0 {
-        return "", errors.New(`Can't find "/" or "\".`)
-    }
-    //fmt.Println("path333:", path)
-    return string(path[0 : i+1]), nil
+    b := make([]uint16, syscall.MAX_PATH)
+	var bb win.BROWSEINFO
+    rv := win.SHBrowseForFolder(&bb)
+
+	if rv != 0 {
+		res := win.SHGetPathFromIDList(rv, (*uint16)(unsafe.Pointer(&b[0])))
+		
+		if res == true {
+			path := syscall.UTF16ToString(b)
+			fmt.Println(path)
+			return string(path), nil	
+		}
+	}
+
+    return nil, nil
 }
